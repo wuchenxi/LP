@@ -1,7 +1,13 @@
-/* Usage: 
+/* 
+   The naive simplex algorithm as presented in Ch. 2
+   of our textbook
+
+   Usage: 
    To compile: gcc -O3 naive_simplex.c -o simplex
-   Then: simplex -v input_file_name 
-   or:  simplex input_file_name
+   Then: simplex  input_file_name 
+   or:  simplex -v input_file_name 
+   for more detailed output.
+
    Input file format: a sequence of numbers separated 
    by space,  tab or end-of-line, starting with the number 
    of variables n, the number of constrains m, then the 
@@ -9,9 +15,9 @@
    then the coefficients of the objective function that 
    is being maximized.
    
-   Note that this code is just an illustration and not 
-   optimized for speed, and I haven't learned a lot of CS
-   so the code quality is sloppy :)
+   Note that this code is just an illustration and has not 
+   been optimized for speed, and I haven't learned a lot 
+   of CS so the code quality is sloppy :)
 */
 
 #include <stdio.h>
@@ -56,7 +62,7 @@ int elim(int i, int k, aug_mat M){
   for(int j=0;j<M.m;j++){
     if(j!=k){
       double t=c[j*M.n+i];
-      printf("%d,%d\n",j,k);
+      /*printf("%d,%d\n",j,k);*/
       for(int s=0;s<M.n;s++)
 	c[j*M.n+s]-=c[k*M.n+s]*t/c[k*M.n+i];
     }
