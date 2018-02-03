@@ -68,7 +68,7 @@ def simplex_from_basics(basics, o_coeffs, M):
         outv=j
         for j in range(m):
             if M[j][i]>0 and (opt_ratio>M[j][n]/M[j][i] or
-                              (opt_ratio>M[j][n]/M[j][i] and
+                              (opt_ratio==M[j][n]/M[j][i] and
                                basics[outv]>basics[j])):
                 outv=j
                 opt_ratio=M[j][n]/M[j][i]
