@@ -1,6 +1,17 @@
 # The naive simplex algorithm as presented in Ch. 2
 #   of our textbook (Bland's rule)
-#usage: python3 naive_simplex.py [-v] data_file_name
+#
+# usage: python3 naive_simplex.py [-v] data_file_name
+# Input file format: a sequence of numbers separated 
+# by space,  tab or end-of-line, starting with the number 
+# of variables n, the number of constrains m, then the 
+# augmented matrix of the equation constraints [A b], 
+# then the coefficients of the objective function that 
+# is being maximized.
+   
+# Note that this code is just an illustration and has not 
+# been optimized for speed, and I haven't learned a lot 
+# of CS so the code quality is sloppy :)
 
 import sys
 
