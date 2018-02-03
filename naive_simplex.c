@@ -33,10 +33,11 @@ typedef struct
 } aug_mat;
 
 int print_aug_mat(aug_mat M){
-  for(int i=0;i<M.m;i++){
-    for(int j=0;j<M.n;j++)
+  int i,j;
+  for(i=0;i<M.m;i++){
+    for(j=0;j<M.n;j++)
       printf("%g ",M.d[i*M.n+j]);
-      printf("\n");
+    printf("\n");
   }
   return 0;
 }
@@ -47,7 +48,8 @@ int perm(int i, int j, aug_mat M){
   double* c=M.d;
   if(i==j)
     return 0;
-  for(int k=0;k<M.n;k++){
+  int k;
+  for(k=0;k<M.n;k++){
     buf=c[i*M.n+k];
     c[i*M.n+k]=c[j*M.n+k];
     c[j*M.n+k]=buf;
@@ -59,24 +61,27 @@ int perm(int i, int j, aug_mat M){
  vector e_k via row operations*/
 int elim(int i, int k, aug_mat M){
   double* c=M.d;
-  for(int j=0;j<M.m;j++){
+  int j;
+  for(j=0;j<M.m;j++){
     if(j!=k){
       double t=c[j*M.n+i];
       /*printf("%d,%d\n",j,k);*/
-      for(int s=0;s<M.n;s++)
+      int s;
+      for(s=0;s<M.n;s++)
 	c[j*M.n+s]-=c[k*M.n+s]*t/c[k*M.n+i];
     }
   }
   double t=c[k*M.n+i];
-  for(int s=0;s<M.n;s++)
-	c[k*M.n+s]/=t;
+  for(j=0;j<M.n;j++)
+	c[k*M.n+j]/=t;
     
   return 0;
 }
 
 
 int is_basic(int i, int m, int* basics){
-  for(int j=0;j<m;j++)
+  int j;
+  for(j=0;j<m;j++)
     if(i==basics[j])return 1;
   return 0;
 }
@@ -90,11 +95,12 @@ int simplex_from_basic(int* basics,  double* o_coeffs,
   double* cur_o_coeffs=(double*)malloc(n*sizeof(double));
   double* old_o_coeffs=(double*)malloc(n*sizeof(double));
   /*Initialize */
-  for(int i=0;i<n;i++){
+  int i,j;
+  for(i=0;i<n;i++){
     if(is_basic(i,m,basics))cur_o_coeffs[i]=0;
     else{
       cur_o_coeffs[i]=o_coeffs[i];
-      for(int j=0;j<m;j++)
+      for(j=0;j<m;j++)
 	cur_o_coeffs[i]-=o_coeffs[basics[j]]*c[j*M.n+i];
     }
   }
@@ -102,18 +108,16 @@ int simplex_from_basic(int* basics,  double* o_coeffs,
   /*Change basic variables */
   while(1){
     if(verbose){
-      for(int i=0;i<m;i++)printf("%d,",basics[i]);
+      for(i=0;i<m;i++)printf("%d,",basics[i]);
       printf("\n");
       print_aug_mat(M);
-      for(int i=0;i<n;i++)printf("%g ",cur_o_coeffs[i]);
+      for(i=0;i<n;i++)printf("%g ",cur_o_coeffs[i]);
       printf("\n\n");
     }
-    int i;
     for(i=0;i<n;i++)
       if(cur_o_coeffs[i]>0)break;
     if(i==n)
       return 0;
-    int j;
     for(j=0;j<m;j++)
       if(c[j*M.n+n]*c[j*M.n+i]>0)break;
     if(j==m)
@@ -127,9 +131,10 @@ int simplex_from_basic(int* basics,  double* o_coeffs,
 	opt_ratio=c[j*M.n+n]/c[j*M.n+i];
       }
     elim(i,outv,M);
-    for(int k=0;k<n;k++)
+    int k;
+    for(k=0;k<n;k++)
       old_o_coeffs[k]=cur_o_coeffs[k];
-    for(int k=0;k<n;k++)
+    for(k=0;k<n;k++)
       cur_o_coeffs[k]-=old_o_coeffs[i]*c[outv*M.n+k];
     cur_o_coeffs[i]=0;
     basics[outv]=i;
@@ -142,23 +147,22 @@ int simplex_from_basic(int* basics,  double* o_coeffs,
 int main(int argc, char* argv[]){
 
   /* Read data */
-  char* input_filename=argv[1];
+  char* input_filename=argv[argc-1];
   if(argv[1][0]=='-'&&argv[1][1]=='v'){
     verbose=1;
-    input_filename=argv[2];
   }
   FILE* data=fopen(input_filename, "r");
-  int m, n;
+  int m, n, i, j;
   if(!fscanf(data, "%d", &n))return 1;
   if(!fscanf(data, "%d", &m))return 1;
   double* c_coeffs=(double*)malloc(m*(n+m+1)*sizeof(double));
   double* o_coeffs=(double*)malloc(n*sizeof(double));
-  for(int i=0;i<m;i++){
-    for(int j=0;j<n;j++)
+  for(i=0;i<m;i++){
+    for(j=0;j<n;j++)
       if(!fscanf(data,"%lf",c_coeffs+i*(n+m+1)+j))return 1;
     if(!fscanf(data,"%lf",c_coeffs+i*(n+m+1)+m+n))return 1;
     double b=c_coeffs[i*(n+m+1)+m+n];
-    for(int j=n;j<m+n;j++)
+    for(j=n;j<m+n;j++)
       if(j-n==i){
 	if(b>=0)c_coeffs[i*(n+m+1)+j]=1;
 	else c_coeffs[i*(n+m+1)+j]=-1;
@@ -166,7 +170,7 @@ int main(int argc, char* argv[]){
       else c_coeffs[i*(n+m+1)+j]=0;
   }
     
-  for(int i=0;i<n;i++)
+  for(i=0;i<n;i++)
     if(!fscanf(data,"%lf",o_coeffs+i))return 1;
   fclose(data);
 
@@ -175,18 +179,17 @@ int main(int argc, char* argv[]){
   /*phase 1 */
   if(verbose)printf("Phase 1\n");
   double* o_coeffs1=(double*)malloc((n+m)*sizeof(double));
-  for(int i=0;i<n;i++)
+  for(i=0;i<n;i++)
     o_coeffs1[i]=0;
-  for(int i=n;i<m+n;i++)
+  for(i=n;i<m+n;i++)
     o_coeffs1[i]=-1;
-  for(int i=0;i<m;i++)
+  for(i=0;i<m;i++)
     basics[i]=n+i;
   aug_mat M;
   M.m=m;
   M.n=m+n+1;
   M.d=c_coeffs;
   simplex_from_basic(basics, o_coeffs1, M);
-  int i;
   for(i=0;i<m;i++)
     if(basics[i]>=n){
       printf("No feasible solution.\n");
@@ -197,8 +200,8 @@ int main(int argc, char* argv[]){
   if(i==m){
     if(verbose)printf("Phase 2\n");
     double* c_coeffs2=(double*)malloc(m*(n+1)*sizeof(double));
-    for(int i=0;i<m;i++){
-      for(int j=0;j<n;j++)
+    for(i=0;i<m;i++){
+      for(j=0;j<n;j++)
 	c_coeffs2[i*(n+1)+j]=c_coeffs[i*(m+n+1)+j];
       c_coeffs2[i*(n+1)+n]=c_coeffs[i*(m+n+1)+m+n];
     }
@@ -210,13 +213,13 @@ int main(int argc, char* argv[]){
     else {
       double* optv=o_coeffs1;
       double opt=0;
-      for(int i=0;i<n;i++)optv[i]=0;
-      for(int j=0;j<m;j++){
+      for(i=0;i<n;i++)optv[i]=0;
+      for(j=0;j<m;j++){
 	optv[basics[j]]=M.d[j*(n+1)+n];
         opt+=M.d[j*(n+1)+n]*o_coeffs[basics[j]];
       }
       printf("Optimal value: %g \n Optimal solution:\n",opt);
-      for(int i=0;i<n;i++)
+      for(i=0;i<n;i++)
 	printf("%g\n",optv[i]);
     }
   }
