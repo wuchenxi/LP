@@ -1,6 +1,6 @@
 /* 
    The naive simplex algorithm as presented in Ch. 2
-   of our textbook
+   of our textbook (Bland's rule)
 
    Usage: 
    To compile: gcc -O3 naive_simplex.c -o simplex
@@ -42,20 +42,6 @@ int print_aug_mat(aug_mat M){
   return 0;
 }
 
-/* Permute the rows i and j of matrix M */
-int perm(int i, int j, aug_mat M){
-  double buf;
-  double* c=M.d;
-  if(i==j)
-    return 0;
-  int k;
-  for(k=0;k<M.n;k++){
-    buf=c[i*M.n+k];
-    c[i*M.n+k]=c[j*M.n+k];
-    c[j*M.n+k]=buf;
-  }
-  return 0;
-}
 
 /* Turn the i-th column of the matrix into standard 
  vector e_k via row operations*/
@@ -93,7 +79,6 @@ int simplex_from_basic(int* basics,  double* o_coeffs,
   int m=M.m;
   double* c=M.d;
   double* cur_o_coeffs=(double*)malloc(n*sizeof(double));
-  double* old_o_coeffs=(double*)malloc(n*sizeof(double));
   /*Initialize */
   int i,j;
   for(i=0;i<n;i++){
@@ -119,28 +104,27 @@ int simplex_from_basic(int* basics,  double* o_coeffs,
     if(i==n)
       return 0;
     for(j=0;j<m;j++)
-      if(c[j*M.n+n]*c[j*M.n+i]>0)break;
+      if(c[j*M.n+i]>0)break;
     if(j==m)
       return 1;
     double opt_ratio=c[j*M.n+n]/c[j*M.n+i];
     int outv=j;
     for(;j<m;j++)
-      if(c[j*M.n+n]*c[j*M.n+i]>0&&
-	 opt_ratio>c[j*M.n+n]/c[j*M.n+i]){
+      if(c[j*M.n+i]>0&&(opt_ratio>c[j*M.n+n]/c[j*M.n+i]
+			||(opt_ratio==c[j*M.n+n]/c[j*M.n+i]
+			   &&basics[j]<basics[outv]))){
 	outv=j;
 	opt_ratio=c[j*M.n+n]/c[j*M.n+i];
       }
     elim(i,outv,M);
     int k;
+    double t=cur_o_coeffs[i];
     for(k=0;k<n;k++)
-      old_o_coeffs[k]=cur_o_coeffs[k];
-    for(k=0;k<n;k++)
-      cur_o_coeffs[k]-=old_o_coeffs[i]*c[outv*M.n+k];
+      cur_o_coeffs[k]-=t*c[outv*M.n+k];
     cur_o_coeffs[i]=0;
     basics[outv]=i;
   }
   free(cur_o_coeffs);
-  free(old_o_coeffs);
   return 0;
 }
 
